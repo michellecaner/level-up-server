@@ -10,22 +10,27 @@ class EventView(ViewSet):
     """Level up events view"""
     
     def retrieve(self, request, pk):
-        """Handle GET requests for single game type
+        """Handle GET requests for single event 
 
         Returns:
-              Response -- JSON serialized game type
+              Response -- JSON serialized event
         """
         event = Event.objects.get(pk=pk)
         serializer = EventSerializer(event)
         return Response(serializer.data)
         
     def list(self, request):
-        """Handle GET requests to get all game types
+        """Handle GET requests to get all events and events by game id
 
           Returns:
-              Response -- JSON serialized list of game types
+              Response -- JSON serialized list of game types and events by game id
         """
         events = Event.objects.all()
+        
+        game = request.query_params.get('game', None)
+        if game is not None:
+            events = events.filter(game_id=game)
+        
         serializer = EventSerializer(events, many=True)
         return Response(serializer.data)
       
