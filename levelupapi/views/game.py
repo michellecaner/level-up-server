@@ -20,14 +20,19 @@ class GameView(ViewSet):
         return Response(serializer.data) 
 
     def list(self, request):
-        """Handle GET requests to get all game types
+        """Handle GET requests to get all games and games by game type id
 
         Returns:
-            Response -- JSON serialized list of game types
+            Response -- JSON serialized list of game types and games by game type id
         """
         
-        game = Game.objects.all()
-        serializer = GameSerializer(game, many=True)
+        games = Game.objects.all()
+        
+        game_type = request.query_params.get('type', None)
+        if game_type is not None:
+            games = games.filter(game_type_id=game_type)
+            
+        serializer = GameSerializer(games, many=True)
         return Response(serializer.data)
 
 class GameSerializer(serializers.ModelSerializer):
