@@ -1,6 +1,7 @@
 """View module for handling requests about events"""
 
 from django.http import HttpResponseServerError
+from django.core.exceptions import ValidationError
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import serializers, status
@@ -45,24 +46,22 @@ class EventView(ViewSet):
         Returns
             Respond -- JSON serialized event instance
         """
-        game = Game.objects.get(pk=request.data["game"])
         organizer = Gamer.objects.get(user=request.auth.user)
-        
-        event = Event.objects.create(
-            game=game,
-            description=request.data["description"],
-            date=request.data["date"],
-            time=request.data["time"],
-            organizer=organizer
-        )
-        serializer = EventSerializer(event)
-        return Response(serializer.data)
+        serializer = CreateEventSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(organizer=organizer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-      
 class EventSerializer(serializers.ModelSerializer):
-    """JSON serializer for events"""
+        """JSON serializer for events"""
+        class Meta:
+            model = Event
+            fields = ('id', 'game', 'description', 'date', 'time', 'organizer')
+            depth = 1 #awesome
+            
+class CreateEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
-        fields = ('id', 'game', 'description', 'date', 'time', 'organizer')
-        depth = 2 #awesome
+        fields = ['id', 'game', 'description', 'date', 'time', 'organizer']  
+
       
