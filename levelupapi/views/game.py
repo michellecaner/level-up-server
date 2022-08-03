@@ -1,4 +1,5 @@
 """View module for handling requests about games"""
+from urllib import response
 from django.http import HttpResponseServerError
 from django.core.exceptions import ValidationError
 from rest_framework.viewsets import ViewSet
@@ -50,8 +51,9 @@ class GameView(ViewSet):
         gamer = Gamer.objects.get(user=request.auth.user)
         serializer = CreateGameSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(gamer=gamer)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        saved_game = serializer.save(gamer=gamer)
+        response = GameSerializer(saved_game)
+        return Response(response.data, status=status.HTTP_201_CREATED)
     
     def update(self, request, pk):
         """Handle PUT requests for a game

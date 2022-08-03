@@ -8,6 +8,7 @@ from rest_framework import serializers, status
 from levelupapi.models import Event
 from levelupapi.models import Game
 from levelupapi.models import Gamer
+from rest_framework.decorators import action
 
 class EventView(ViewSet):
     """Level up events view"""
@@ -69,6 +70,15 @@ class EventView(ViewSet):
         event = Event.objects.get(pk=pk)
         event.delete()
         return Response(None, status=status.HTTP_204_NO_CONTENT)
+    
+    @action(methods=['post'], detail=True)
+    def signup(self, request, pk):
+        """Post request for a user to sign up for an event"""
+        
+        gamer = Gamer.objects.get(user=request.auth.user)
+        event = Event.objects.get(pk=pk)
+        event.attendees.add(gamer)
+        return Response({'message': 'Gamer added!'}, status=status.HTTP_201_CREATED)
 
 class EventSerializer(serializers.ModelSerializer):
         """JSON serializer for events"""
