@@ -33,5 +33,6 @@ urlpatterns = [
     # Requests to http://localhost:8000/login will be routed to the login_user function
     path('login', login_user),
     path('admin/', admin.site.urls),
-    path('', include(router.urls))
+    path('', include(router.urls)),
+    path('', include('levelupreports.urls'))
 ]
